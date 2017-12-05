@@ -1,0 +1,29 @@
+int a = 4;
+while(a != 0){
+    int j = a;
+    while(j != 0){
+        if(j/2 != 1){
+            write(j);
+        }
+        j = j-1;  
+    }
+    if( a < 2){
+        write(a);
+    }
+    else{
+        write(a+3);
+    }
+    a = a -1;
+}
+/*
+output:
+4
+1
+7
+1
+6
+1
+5
+1
+1
+*/

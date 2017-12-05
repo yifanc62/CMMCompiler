@@ -1,0 +1,12 @@
+int a = 6;
+int factorial = 1;
+while( a != 0 ){
+	factorial = factorial * a;
+	a = a -1;
+}
+write( factorial );
+
+/*
+output:
+720
+*/
