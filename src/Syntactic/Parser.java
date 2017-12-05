@@ -38,7 +38,7 @@ public class Parser {
     }
 
     private TreeNode parseProgram() throws UnexpectedEOFException {
-        TreeNode programNode = new TreeNode(NodeType.PROGRAM,1);
+        TreeNode programNode = new TreeNode(NodeType.PROGRAM, 1);
         while (!input.endOfStream()) {
             programNode.addChild(parseStatement());
         }
@@ -72,8 +72,8 @@ public class Parser {
                 throw new UnexpectedTokenException(next);
             }
         } catch (UnexpectedTokenException e) {
-            //短语层错误恢复
             exceptions.add(e);
+            //短语层错误恢复
             while (!(input.peek().getType().isOneOf(K_STMT_IF, K_STMT_WHILE, K_STMT_FOR, V_VARIABLE, K_TYPE_INT, K_TYPE_DOUBLE, K_IO_READ, K_IO_WRITE, S_BRACE_L) || input.peek().getType().isOneOf(S_BRACE_R, S_SEMICOLON))) {
                 input.pop();
                 check();
@@ -93,12 +93,10 @@ public class Parser {
         Token next = input.peek();
         if (next.getType() == S_BRACE_L) {
             input.pop(); //大括号左部
-            if (input.endOfStream())
-                throw new UnexpectedEOFException();
+            check();
             while (input.peek().getType() != S_BRACE_R) {
                 blockNode.addChild(parseStatement());
-                if (input.endOfStream())
-                    throw new UnexpectedEOFException();
+                check();
             }
             input.pop(); //大括号右部
         } else {
@@ -111,24 +109,21 @@ public class Parser {
         TreeNode ifNode = new TreeNode(NodeType.STMT_IF);
         try {
             Token next = input.pop(); //if关键字
-            if (input.endOfStream())
-                throw new UnexpectedEOFException();
+            check();
             if ((next = input.pop()).getType() != S_PARENTHESIS_L) //小括号左部
                 throw new UnexpectedTokenException(next, "'('");
-            if (input.endOfStream())
-                throw new UnexpectedEOFException();
+            check();
             ifNode.addChild(parseExpression());
-            if (input.endOfStream())
-                throw new UnexpectedEOFException();
-            if ((next = input.pop()).getType() != S_PARENTHESIS_R) //小括号左部
+            check();
+            if ((next = input.pop()).getType() != S_PARENTHESIS_R) //小括号右部
                 throw new UnexpectedTokenException(next, "')'");
-            if (input.endOfStream())
-                throw new UnexpectedEOFException();
-
+            check();
+            ifNode.addChild(parseBlock());
+            check();
+            //TODO:ELSE BLOCK CHECK
         } catch (UnexpectedTokenException e) {
-            if (e.getToken() == null)
-                throw e;
             exceptions.add(e);
+            //短语层错误恢复
         }
         return ifNode;
     }
@@ -167,9 +162,6 @@ public class Parser {
     }
 
     private TreeNode parseFactor() throws UnexpectedEOFException {
-    }
-
-    private TreeNode parseOperatorLogical() throws UnexpectedEOFException {
     }
 
     private TreeNode parseOperatorComparative() throws UnexpectedEOFException {
