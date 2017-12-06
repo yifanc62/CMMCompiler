@@ -11,6 +11,8 @@ public enum NodeType {
     STMT_READ,
     STMT_WRITE,
     VARIABLE,
+    NAME,
+    INDEX,
     EXP_LOGICAL,
     EXP_ARITHMETICAL,
     TERM,

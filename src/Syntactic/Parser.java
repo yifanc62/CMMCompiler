@@ -269,9 +269,9 @@ public class Parser {
 
     private TreeNode parseAssign() throws UnexpectedEOFException {
         TreeNode assignNode = new TreeNode(NodeType.STMT_ASSIGN);
-        Token next = input.pop();
+        Token next = input.peek();
         assignNode.setLine(next.getLine());
-        assignNode.addChild(new TreeNode(NodeType.VARIABLE).setValue(next.getValue()));
+        assignNode.addChild(parseVariable());
         check();
         if ((next = input.peek()).getType() == S_ASSIGN) {
             input.pop(); //赋值符
@@ -309,7 +309,7 @@ public class Parser {
         TreeNode assignNode = new TreeNode(NodeType.STMT_ASSIGN);
         Token next = input.pop();
         assignNode.setLine(next.getLine());
-        assignNode.addChild(new TreeNode(NodeType.VARIABLE).setValue(next.getValue()));
+        assignNode.addChild(parseVariable());
         check();
         if ((next = input.peek()).getType() == S_ASSIGN) {
             input.pop(); //赋值符
@@ -350,10 +350,137 @@ public class Parser {
 
     private TreeNode parseRead() throws UnexpectedEOFException {
         TreeNode readNode = new TreeNode(NodeType.STMT_READ);
+        Token next;
+        readNode.setLine(input.pop().getLine()); //read关键字
+        check();
+        if ((next = input.peek()).getType() == S_PARENTHESIS_L) {
+            input.pop(); //小括号左部
+        } else {
+            try {
+                throw new UnexpectedTokenException(next, S_PARENTHESIS_L);
+            } catch (UnexpectedTokenException e) {
+                exceptions.add(e);
+                //短语层错误恢复
+                while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                    input.pop();
+                    check();
+                }
+            }
+        }
+        check();
+        readNode.addChild(parseVariable());
+        check();
+        if ((next = input.peek()).getType() == S_PARENTHESIS_R) {
+            input.pop(); //小括号右部
+        } else {
+            try {
+                throw new UnexpectedTokenException(next, S_PARENTHESIS_R);
+            } catch (UnexpectedTokenException e) {
+                exceptions.add(e);
+                //短语层错误恢复
+                while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                    input.pop();
+                    check();
+                }
+            }
+        }
+        return readNode;
     }
 
     private TreeNode parseWrite() throws UnexpectedEOFException {
         TreeNode writeNode = new TreeNode(NodeType.STMT_WRITE);
+        Token next;
+        writeNode.setLine(input.pop().getLine()); //write关键字
+        check();
+        if ((next = input.peek()).getType() == S_PARENTHESIS_L) {
+            input.pop(); //小括号左部
+        } else {
+            try {
+                throw new UnexpectedTokenException(next, S_PARENTHESIS_L);
+            } catch (UnexpectedTokenException e) {
+                exceptions.add(e);
+                //短语层错误恢复
+                while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                    input.pop();
+                    check();
+                }
+            }
+        }
+        check();
+        writeNode.addChild(parseExpressionArithmetical());
+        check();
+        if ((next = input.peek()).getType() == S_PARENTHESIS_R) {
+            input.pop(); //小括号右部
+        } else {
+            try {
+                throw new UnexpectedTokenException(next, S_PARENTHESIS_R);
+            } catch (UnexpectedTokenException e) {
+                exceptions.add(e);
+                //短语层错误恢复
+                while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                    input.pop();
+                    check();
+                }
+            }
+        }
+        return writeNode;
+    }
+
+    private TreeNode parseVariable() throws UnexpectedEOFException {
+        TreeNode varNode = new TreeNode(NodeType.VARIABLE);
+        Token next = input.peek();
+        varNode.setLine(next.getLine());
+        if (next.getType().isVariable()) {
+            input.pop(); //变量名
+            varNode.addChild(new TreeNode(NodeType.NAME).setValue(next.getValue()));
+        } else {
+            try {
+                throw new UnexpectedTokenException(next, V_VARIABLE);
+            } catch (UnexpectedTokenException e) {
+                exceptions.add(e);
+                //短语层错误恢复
+                while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                    input.pop();
+                    check();
+                }
+            }
+            return parseVariable();
+        }
+        if (!input.endOfStream() && input.peek().getType() == S_BRACKET_L) {
+            input.pop(); //中括号左部
+            check();
+            next = input.peek();
+            if (next.getType() == V_INT) {
+                input.pop(); //索引
+                varNode.addChild(new TreeNode(NodeType.INDEX).setValue(next.getValue()));
+            } else {
+                try {
+                    throw new UnexpectedTokenException(next, V_INT).endsWith(S_BRACKET_R);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.peek().getType().isOneOf(e.getEndTypes())) {
+                        input.pop();
+                        check();
+                    }
+                }
+            }
+            check();
+            if (next.getType() == S_BRACKET_R) {
+                input.pop(); //中括号右部
+            } else {
+                try {
+                    throw new UnexpectedTokenException(next, S_BRACKET_R);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.pop().getType().isOneOf(e.getStartTypes())) {
+                        check();
+                    }
+                }
+            }
+        }
+        return varNode;
     }
 
     private TreeNode parseExpressionLogical() throws UnexpectedEOFException {
@@ -388,14 +515,64 @@ public class Parser {
             case S_LE:
                 return new TreeNode(NodeType.OP_LE).setLine(next.getLine());
             default:
-                throw new UnexpectedTokenException(next, S_EQUAL, S_UNEQUAL, S_GT, S_GE, S_LT, S_LE);
+                try {
+                    throw new UnexpectedTokenException(next, S_EQUAL, S_UNEQUAL, S_GT, S_GE, S_LT, S_LE);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                        input.pop();
+                        check();
+                    }
+                }
+                return parseOperatorComparative();
         }
     }
 
     private TreeNode parseOperatorAdditive() throws UnexpectedEOFException {
+        Token next = input.pop();
+        switch (next.getType()) {
+            case S_PLUS:
+                return new TreeNode(NodeType.OP_PLUS).setLine(next.getLine());
+            case S_MINUS:
+                return new TreeNode(NodeType.OP_MINUS).setLine(next.getLine());
+            default:
+                try {
+                    throw new UnexpectedTokenException(next, S_PLUS, S_MINUS);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                        input.pop();
+                        check();
+                    }
+                }
+                return parseOperatorAdditive();
+        }
     }
 
     private TreeNode parseOperatorMultiplicative() throws UnexpectedEOFException {
+        Token next = input.pop();
+        switch (next.getType()) {
+            case S_MULTIPLY:
+                return new TreeNode(NodeType.OP_PLUS).setLine(next.getLine());
+            case S_DIVIDE:
+                return new TreeNode(NodeType.OP_MINUS).setLine(next.getLine());
+            case S_MOD:
+                return new TreeNode(NodeType.OP_MOD).setLine(next.getLine());
+            default:
+                try {
+                    throw new UnexpectedTokenException(next, S_MULTIPLY, S_DIVIDE, S_MOD);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                        input.pop();
+                        check();
+                    }
+                }
+                return parseOperatorMultiplicative();
+        }
     }
 
     private void check() throws UnexpectedEOFException {
