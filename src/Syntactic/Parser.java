@@ -264,6 +264,8 @@ public class Parser {
             }
             forNode.addChild(null);
         }
+        check();
+        forNode.addChild(parseBlock());
         return forNode;
     }
 
@@ -345,7 +347,163 @@ public class Parser {
 
     private TreeNode parseDeclare() throws UnexpectedEOFException {
         TreeNode declareNode = new TreeNode(NodeType.STMT_DECLARE);
-
+        Token next = input.pop(); //类型
+        declareNode.setLine(next.getLine());
+        TreeNode typeNode;
+        if (next.getType() == K_TYPE_INT) {
+            typeNode = new TreeNode(NodeType.TYPE_INT);
+        } else if (next.getType() == K_TYPE_DOUBLE) {
+            typeNode = new TreeNode(NodeType.TYPE_DOUBLE);
+        } else {
+            try {
+                throw new UnexpectedTokenException(next, K_TYPE_INT, K_TYPE_DOUBLE);
+            } catch (UnexpectedTokenException e) {
+                exceptions.add(e);
+                //短语层错误恢复
+                while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                    input.pop();
+                    check();
+                }
+            }
+            return parseDeclare();
+        }
+        check();
+        if (next.getType() == S_BRACKET_L) {
+            input.pop(); //中括号左部
+            check();
+            if ((next = input.peek()).getType() == V_INT) {
+                input.pop(); //索引
+                typeNode.setValue(next.getValue());
+            } else {
+                try {
+                    throw new UnexpectedTokenException(next, V_INT).endsWith(S_BRACKET_R);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.peek().getType().isOneOf(e.getEndTypes())) {
+                        input.pop();
+                        check();
+                    }
+                }
+            }
+            check();
+            if (next.getType() == S_BRACKET_R) {
+                input.pop(); //中括号右部
+            } else {
+                try {
+                    throw new UnexpectedTokenException(next, S_BRACKET_R);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.pop().getType().isOneOf(e.getStartTypes())) {
+                        check();
+                    }
+                }
+            }
+        }
+        declareNode.addChild(typeNode);
+        check();
+        TreeNode idNode = new TreeNode(NodeType.IDENTIFIER);
+        if ((next = input.peek()).getType().isVariable()) {
+            input.pop();
+            idNode.addChild(new TreeNode(NodeType.NAME).setValue(next.getValue()));
+            if (input.peek().getType() == S_ASSIGN) {
+                input.pop();
+                if ((next = input.peek()).getType() == V_INT) {
+                    input.pop();
+                    idNode.addChild(new TreeNode(NodeType.V_INT).setValue(next.getValue()));
+                } else if (next.getType() == V_DOUBLE) {
+                    input.pop();
+                    idNode.addChild(new TreeNode(NodeType.V_INT).setValue(next.getValue()));
+                } else {
+                    try {
+                        throw new UnexpectedTokenException(next, V_INT, V_DOUBLE).endsWith(S_COMMA, S_SEMICOLON);
+                    } catch (UnexpectedTokenException e) {
+                        exceptions.add(e);
+                        //短语层错误恢复
+                        while (!input.peek().getType().isOneOf(e.getEndTypes())) {
+                            input.pop();
+                            check();
+                        }
+                    }
+                }
+            } else {
+                idNode.addChild(null);
+            }
+        } else {
+            try {
+                throw new UnexpectedTokenException(next, V_VARIABLE);
+            } catch (UnexpectedTokenException e) {
+                exceptions.add(e);
+                //短语层错误恢复
+                while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                    input.pop();
+                    check();
+                }
+            }
+        }
+        declareNode.addChild(idNode);
+        check();
+        while ((next = input.peek()).getType() != S_SEMICOLON) {
+            if (next.getType() == S_COMMA) {
+                input.pop();
+            } else {
+                try {
+                    throw new UnexpectedTokenException(next, S_COMMA).endsWith(S_COMMA, S_SEMICOLON);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.peek().getType().isOneOf(e.getEndTypes())) {
+                        input.pop();
+                        check();
+                    }
+                }
+                continue;
+            }
+            idNode = new TreeNode(NodeType.IDENTIFIER);
+            if ((next = input.peek()).getType().isVariable()) {
+                input.pop();
+                idNode.addChild(new TreeNode(NodeType.NAME).setValue(next.getValue()));
+                if (input.peek().getType() == S_ASSIGN) {
+                    input.pop();
+                    if ((next = input.peek()).getType() == V_INT) {
+                        input.pop();
+                        idNode.addChild(new TreeNode(NodeType.V_INT).setValue(next.getValue()));
+                    } else if (next.getType() == V_DOUBLE) {
+                        input.pop();
+                        idNode.addChild(new TreeNode(NodeType.V_INT).setValue(next.getValue()));
+                    } else {
+                        try {
+                            throw new UnexpectedTokenException(next, V_INT, V_DOUBLE).endsWith(S_COMMA, S_SEMICOLON);
+                        } catch (UnexpectedTokenException e) {
+                            exceptions.add(e);
+                            //短语层错误恢复
+                            while (!input.peek().getType().isOneOf(e.getEndTypes())) {
+                                input.pop();
+                                check();
+                            }
+                        }
+                    }
+                } else {
+                    idNode.addChild(null);
+                }
+            } else {
+                try {
+                    throw new UnexpectedTokenException(next, V_VARIABLE);
+                } catch (UnexpectedTokenException e) {
+                    exceptions.add(e);
+                    //短语层错误恢复
+                    while (!input.peek().getType().isOneOf(e.getStartTypes())) {
+                        input.pop();
+                        check();
+                    }
+                }
+            }
+            declareNode.addChild(idNode);
+            check();
+        }
+        input.pop(); //分号
+        return declareNode;
     }
 
     private TreeNode parseRead() throws UnexpectedEOFException {
@@ -464,6 +622,7 @@ public class Parser {
                         check();
                     }
                 }
+                varNode.addChild(null);
             }
             check();
             if (next.getType() == S_BRACKET_R) {
@@ -479,6 +638,8 @@ public class Parser {
                     }
                 }
             }
+        } else {
+            varNode.addChild(null);
         }
         return varNode;
     }
@@ -555,9 +716,9 @@ public class Parser {
         Token next = input.pop();
         switch (next.getType()) {
             case S_MULTIPLY:
-                return new TreeNode(NodeType.OP_PLUS).setLine(next.getLine());
+                return new TreeNode(NodeType.OP_MULTIPLY).setLine(next.getLine());
             case S_DIVIDE:
-                return new TreeNode(NodeType.OP_MINUS).setLine(next.getLine());
+                return new TreeNode(NodeType.OP_DIVIDE).setLine(next.getLine());
             case S_MOD:
                 return new TreeNode(NodeType.OP_MOD).setLine(next.getLine());
             default:
