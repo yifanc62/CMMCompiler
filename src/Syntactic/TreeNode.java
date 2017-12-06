@@ -9,6 +9,11 @@ public class TreeNode {
     private String value;
     private int line;
 
+    public TreeNode(NodeType type) {
+        this.type = type;
+        this.children = new ArrayList<>();
+    }
+
     public TreeNode(NodeType type, int line) {
         this.type = type;
         this.children = new ArrayList<>();
@@ -39,5 +44,10 @@ public class TreeNode {
 
     public int getLine() {
         return line;
+    }
+
+    public TreeNode setLine(int line) {
+        this.line = line;
+        return this;
     }
 }

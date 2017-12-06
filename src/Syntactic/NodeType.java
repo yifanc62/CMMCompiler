@@ -2,7 +2,6 @@ package Syntactic;
 
 public enum NodeType {
     PROGRAM,
-    STMT,
     STMT_BLOCK,
     STMT_IF,
     STMT_WHILE,
@@ -12,7 +11,6 @@ public enum NodeType {
     STMT_READ,
     STMT_WRITE,
     VARIABLE,
-    EXP,
     EXP_LOGICAL,
     EXP_ARITHMETICAL,
     TERM,
