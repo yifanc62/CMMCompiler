@@ -15,6 +15,20 @@ public class Command {
         this.line = line;
     }
 
+    public CommandType getType() {
+    	return this.type;
+    }
+    public String getArg0() {
+    	return this.arg0;
+    }
+    public String getArg1() {
+    	return this.arg1;
+    }
+    public String getArg2() {
+    	return this.arg2;
+    }
+    
+    
     private String encode() {
         return String.format("(%s,%s,%s,%s).%d", type.toString(), arg0 == null ? " " : arg0, arg1 == null ? " " : arg1, arg2 == null ? " " : arg2, line);
     }
