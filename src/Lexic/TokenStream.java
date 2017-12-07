@@ -20,8 +20,8 @@ public class TokenStream {
         this.tokens = new ArrayList<>(tokens);
     }
 
-    public boolean isSuccess() {
-        return position != 0 && getErrors().isEmpty();
+    public boolean containErrors() {
+        return getErrors().isEmpty();
     }
 
     private List<Token> getAllTokens() {
