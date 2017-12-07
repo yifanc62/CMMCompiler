@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 
 import static Util.Util.*;
 
-public class Main {
+public class Temp {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage: CMMParser [file1 file2 file3...]");

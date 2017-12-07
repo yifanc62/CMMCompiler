@@ -15,7 +15,56 @@ public class Command {
         this.line = line;
     }
 
-    private static Command decode(String encodedStr) {
+    public CommandType getType() {
+        return this.type;
+    }
+
+    public String getArg0() {
+        return this.arg0;
+    }
+
+    public String getArg1() {
+        return this.arg1;
+    }
+
+    public String getArg2() {
+        return this.arg2;
+    }
+
+    public int getLine() {
+        return line;
+    }
+
+    public Command setType(CommandType type) {
+        this.type = type;
+        return this;
+    }
+
+    public Command setArg0(String arg0) {
+        this.arg0 = arg0;
+        return this;
+    }
+
+    public Command setArg1(String arg1) {
+        this.arg1 = arg1;
+        return this;
+    }
+
+    public Command setArg2(String arg2) {
+        this.arg2 = arg2;
+        return this;
+    }
+
+    public Command setLine(int line) {
+        this.line = line;
+        return this;
+    }
+
+    public String encode() {
+        return String.format("(%s,%s,%s,%s).%d", type.toString(), arg0 == null ? " " : arg0, arg1 == null ? " " : arg1, arg2 == null ? " " : arg2, line);
+    }
+
+    public static Command decode(String encodedStr) {
         try {
             encodedStr = encodedStr.trim();
             int i = encodedStr.lastIndexOf('.');
@@ -33,25 +82,5 @@ public class Command {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public CommandType getType() {
-        return this.type;
-    }
-
-    public String getArg0() {
-        return this.arg0;
-    }
-
-    public String getArg1() {
-        return this.arg1;
-    }
-
-    public String getArg2() {
-        return this.arg2;
-    }
-
-    private String encode() {
-        return String.format("(%s,%s,%s,%s).%d", type.toString(), arg0 == null ? " " : arg0, arg1 == null ? " " : arg1, arg2 == null ? " " : arg2, line);
     }
 }
