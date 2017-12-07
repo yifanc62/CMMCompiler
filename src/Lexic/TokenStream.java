@@ -20,6 +20,10 @@ public class TokenStream {
         this.tokens = new ArrayList<>(tokens);
     }
 
+    public boolean isSuccess() {
+        return position != 0 && getErrors().isEmpty();
+    }
+
     private List<Token> getAllTokens() {
         return tokens;
     }
@@ -42,7 +46,7 @@ public class TokenStream {
     public Token peek() {
         if (endOfStream())
             return null;
-        return tokens.get(position++);
+        return tokens.get(position);
     }
 
     public void reset() {
@@ -54,12 +58,14 @@ public class TokenStream {
     }
 
     public List<Token> getErrors() {
-        List<Token> result = new ArrayList<>();
         return tokens.stream().filter(t -> t.getType().isError()).collect(Collectors.toList());
     }
 
     public TokenStream reduceErrors() {
-        List<Token> result = new ArrayList<>();
         return new TokenStream(tokens.stream().filter(t -> !t.getType().isError()).collect(Collectors.toList()));
+    }
+
+    public TokenStream reduceComments() {
+        return new TokenStream(tokens.stream().filter(t -> !t.getType().isComment()).collect(Collectors.toList()));
     }
 }

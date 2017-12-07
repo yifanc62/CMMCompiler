@@ -3,6 +3,7 @@ package Util;
 import Lexic.Token;
 import Lexic.TokenStream;
 import Lexic.TokenType;
+import Syntactic.Parser;
 import Syntactic.TreeNode;
 
 public class Util {
@@ -24,12 +25,39 @@ public class Util {
         }
     }
 
-    public static void printTreeNode(TreeNode root) {
+    public static void printParserError(Parser parser) {
+        for (Exception e : parser.getExceptions()) {
+            System.out.println(e.getMessage());
+        }
+    }
 
+    public static void printTreeNode(TreeNode root) {
+        if (root == null) {
+            System.out.println("NULL");
+        } else if (!root.getChildren().isEmpty()) {
+            System.out.println(root.getType().toString());
+            for (TreeNode child : root.getChildren()) {
+                printTreeNode(child, 1);
+            }
+        } else {
+            System.out.println(root.getType().toString() + (root.getValue() == null ? "" : ": " + root.getValue()));
+        }
     }
 
     private static void printTreeNode(TreeNode node, int indent) {
-
+        for (int i = 0; i < indent; i++) {
+            System.out.print("\t");
+        }
+        if (node == null) {
+            System.out.println("NULL");
+        } else if (!node.getChildren().isEmpty()) {
+            System.out.println(node.getType().toString());
+            for (TreeNode child : node.getChildren()) {
+                printTreeNode(child, indent + 1);
+            }
+        } else {
+            System.out.println(node.getType().toString() + (node.getValue() == null ? "" : ": " + node.getValue()));
+        }
     }
 
     public static String tokenTypesToString(TokenType... types) {

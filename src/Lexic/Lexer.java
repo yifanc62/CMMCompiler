@@ -20,6 +20,26 @@ public class Lexer {
         this.input = input;
     }
 
+    private static boolean isNum(char input) {
+        return input >= '0' && input <= '9';
+    }
+
+    private static boolean isAlphabet(char input) {
+        return (input >= 'A' && input <= 'Z') || (input >= 'a' && input <= 'z');
+    }
+
+    private static boolean isHexChar(char input) {
+        return isNum(input) || (input >= 'A' && input <= 'F') || (input >= 'a' && input <= 'f');
+    }
+
+    private static boolean isIdentifier(char input) {
+        return isNum(input) || isAlphabet(input) || input == '_';
+    }
+
+    private static boolean isSkippable(char input) {
+        return input == ' ' || input == '\t' || input == '\r' || input == '\n';
+    }
+
     private void init() {
         result = new TokenStream();
         currentLine = 1;
@@ -908,25 +928,5 @@ public class Lexer {
         result.add(new Token(currentLine, currentTokenPosition, currentIndex, type, currentValue).setValueWithoutLength(Integer.valueOf(currentValue, 16).toString()));
         resetValue();
         rollback = true;
-    }
-
-    private static boolean isNum(char input) {
-        return input >= '0' && input <= '9';
-    }
-
-    private static boolean isAlphabet(char input) {
-        return (input >= 'A' && input <= 'Z') || (input >= 'a' && input <= 'z');
-    }
-
-    private static boolean isHexChar(char input) {
-        return isNum(input) || (input >= 'A' && input <= 'F') || (input >= 'a' && input <= 'f');
-    }
-
-    private static boolean isIdentifier(char input) {
-        return isNum(input) || isAlphabet(input) || input == '_';
-    }
-
-    private static boolean isSkippable(char input) {
-        return input == ' ' || input == '\t' || input == '\r' || input == '\n';
     }
 }
