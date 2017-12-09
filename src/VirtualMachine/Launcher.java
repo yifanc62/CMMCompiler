@@ -643,10 +643,16 @@ public class Launcher {
     private void pr(Command current, PrintStream out) throws IOException {
         switch (current.getArg0()) {
             case "<":
-                out.println(eax.getValue());
+                if (eax.getType() == DOUBLE && !eax.getValue().contains("."))
+                    out.println(eax.getValue() + ".0");
+                else
+                    out.println(eax.getValue());
                 break;
             case ">":
-                out.println(ebx.getValue());
+                if (ebx.getType() == DOUBLE && !ebx.getValue().contains("."))
+                    out.println(ebx.getValue() + ".0");
+                else
+                    out.println(ebx.getValue());
                 break;
             default:
                 throw new LauncherException("Internal error: SC command invalid");

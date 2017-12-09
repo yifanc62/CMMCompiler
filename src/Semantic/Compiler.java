@@ -398,6 +398,11 @@ public class Compiler {
             TreeNode leftNode = exprNode.getChild(0);
             TreeNode opNode = exprNode.getChild(1);
             TreeNode rightNode = exprNode.getChild(2);
+            if (rightNode.getType() == EXP_ARITHMETICAL) {
+                exprNode.replaceChild(2, rightNode.getChild(0));
+                rightNode.replaceChild(0, exprNode);
+                return compileExpressionArithmetical(rightNode);
+            }
             addCommands(result, compileExpressionArithmetical(leftNode));
             addCommands(result, compileExpressionArithmetical(rightNode));
             switch (opNode.getType()) {
@@ -420,6 +425,11 @@ public class Compiler {
         TreeNode leftNode = termNode.getChild(0);
         TreeNode opNode = termNode.getChild(1);
         TreeNode rightNode = termNode.getChild(2);
+        if (rightNode.getType() == TERM) {
+            termNode.replaceChild(2, rightNode.getChild(0));
+            rightNode.replaceChild(0, termNode);
+            return compileTerm(rightNode);
+        }
         if (opNode.getType() == OP_DIVIDE) {
             if (rightNode.getType() == V_INT) {
                 if (Integer.valueOf(rightNode.getValue()) == 0)
@@ -450,10 +460,21 @@ public class Compiler {
 
     private List<Command> compileFactor(TreeNode factorNode) throws CompilerException {
         List<Command> result = new ArrayList<>();
+        TreeNode opNode = factorNode.getChild(0);
         TreeNode exprNode = factorNode.getChild(1);
-        addCommands(result, compileExpressionArithmetical(exprNode));
-        addCommand(result, new Command(PUSH, null, "-1", "int", factorNode.getLine()));
-        addCommand(result, new Command(MUL, null, null, null, factorNode.getLine()));
+        switch (opNode.getType()) {
+            case OP_PLUS:
+                addCommands(result, compileExpressionArithmetical(exprNode));
+                break;
+            case OP_MINUS:
+                addCommands(result, compileExpressionArithmetical(exprNode));
+                addCommand(result, new Command(PUSH, null, "-1", "int", factorNode.getLine()));
+                addCommand(result, new Command(MUL, null, null, null, factorNode.getLine()));
+                break;
+            default:
+                //Unreachable area
+                break;
+        }
         return result;
     }
 

@@ -738,9 +738,9 @@ public class Parser {
         factorNode.setLine(next.getLine());
         if (next.getType() == S_PARENTHESIS_L) {
             input.pop();
+            factorNode.addChild(new TreeNode(NodeType.OP_PLUS).setLine(next.getLine()));
             check();
-            TreeNode exprNode = parseExpressionArithmetical();
-            check();
+            factorNode.addChild(parseExpressionArithmetical());
             if ((next = input.peek()).getType() == S_PARENTHESIS_R) {
                 input.pop(); //小括号右部
             } else {
@@ -754,7 +754,7 @@ public class Parser {
                     }
                 }
             }
-            return exprNode;
+            return factorNode;
         } else if (next.getType() == V_INT) {
             input.pop();
             return new TreeNode(NodeType.V_INT).setValue(next.getValue()).setLine(next.getLine());
@@ -763,8 +763,10 @@ public class Parser {
             return new TreeNode(NodeType.V_DOUBLE).setValue(next.getValue()).setLine(next.getLine());
         } else if (next.getType() == S_PLUS) {
             input.pop();
+            factorNode.addChild(new TreeNode(NodeType.OP_PLUS).setLine(next.getLine()));
             check();
-            return parseExpressionArithmetical();
+            factorNode.addChild(parseExpressionArithmetical());
+            return factorNode;
         } else if (next.getType() == S_MINUS) {
             input.pop();
             factorNode.addChild(new TreeNode(NodeType.OP_MINUS).setLine(next.getLine()));

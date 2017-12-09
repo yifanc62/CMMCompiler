@@ -47,8 +47,6 @@ public class Variable {
 
     public void assign(Variable variable) {
         values = variable.values;
-        length = variable.length;
-        type = variable.type;
     }
 
     public void assignChild(String value, int index) {

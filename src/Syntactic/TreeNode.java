@@ -32,6 +32,12 @@ public class TreeNode {
         return children.get(index);
     }
 
+    public TreeNode replaceChild(int index, TreeNode node) {
+        children.remove(index);
+        children.add(index, node);
+        return this;
+    }
+
     public TreeNode addChild(TreeNode child) {
         children.add(child);
         return this;
