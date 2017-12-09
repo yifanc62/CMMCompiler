@@ -3,7 +3,13 @@ package Semantic;
 import java.util.Arrays;
 
 public enum CommandType {
-    CMP, //(cmp, value, value, null) value: name/register(<,>)
+    //register: '<'->eax '>'->ebx
+    //type: 'int'->int 'double'->double
+    //address: int
+    //name: String
+    //length: int
+    //value: int/double
+    CMP, //(cmp, register, register, null)
     JMP, //(jmp, address, null, null)
     JE,  //(je, address, null, null)
     JNE, //(jne, address, null, null)
@@ -11,21 +17,20 @@ public enum CommandType {
     JGE, //(jge, address, null, null)
     JL,  //(jl, address, null, null)
     JLE, //(jle, address, null, null)
-    DEF, //(def, name, value, type) value:int/double/register(<,>) type:'int'/'double'/null
-    MOV, //(mov, name, value, type) value:int/double/register(<,>) type:'int'/'double'/null
+    DEF, //(def, name, register, type)/(def, name, length, type)/(def, name, null, type)
+    MOV, //(mov, name, null, register)/(mov, name, register, register)/(mov, register, name, null)/(mov, register, name, register)/(mov, register, value, type)
     IN,  //(in, null, null, null)
     OUT, //(out, null, null, null)
-    PUSH,//(push, null, value, type)/(push, name, null, null) value:int/double/register(<,>) type:'int'/'double'/null
-    POP, //(pop, value, null, null) value: name/register(<,>)
-    INC, //(inc, target, value, type) target:name/register(<,>) value:int/double/register(<,>) type:'int'/'double'/null
-    DEC, //(dec, target, value, type) target:name/register(<,>) value:int/double/register(<,>) type:'int'/'double'/null
+    PUSH,//(push, null, value, type)/(push, register, null, null)
+    POP, //(pop, register, null, null)
     ADD, //(add, null, null, null)
     SUB, //(sub, null, null, null)
     MUL, //(mul, null, null, null)
     DIV, //(div, null, null, null)
-    MOD, //(div, null, null, null)
-    SC,  //(sc, target, null, null) target:name/register(<,>)
-    PR;   //(pr, source, null, null) source:name/register(<,>)
+    MOD, //(mod, null, null, null)
+    SC,  //(sc, register, null, null)
+    PR,  //(pr, register, null, null)
+    EXIT;//(exit, null, null, null)
 
     public boolean isJump() {
         return Arrays.asList(JMP, JE, JNE, JG, JGE, JL, JLE).contains(this);

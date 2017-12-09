@@ -143,10 +143,10 @@ public class Parser {
         }
         check();
         ifNode.addChild(parseBlock());
-        if (!input.endOfStream() && input.peek().getType() == K_STMT_ELSE) {
+        if (!input.endOfStream() && (next = input.peek()).getType() == K_STMT_ELSE) {
             input.pop(); //else关键字
             check();
-            ifNode.addChild(parseBlock());
+            ifNode.addChild(parseBlock().setLine(next.getLine()));
         } else {
             ifNode.addChild(null);
         }

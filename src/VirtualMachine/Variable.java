@@ -1,6 +1,7 @@
 package VirtualMachine;
 
-import static VirtualMachine.VariableType.*;
+import static VirtualMachine.VariableType.DOUBLE;
+import static VirtualMachine.VariableType.INT;
 
 public class Variable {
     private String[] values;
@@ -17,7 +18,7 @@ public class Variable {
                 this.values = new String[]{value};
                 break;
             default:
-                throw new LauncherException();
+                throw new LauncherException("Internal error: Invalid function call of 'Variable(String value, VariableType type)'");
         }
         length = -1;
         this.type = type;
@@ -26,48 +27,44 @@ public class Variable {
     public Variable(String[] values, VariableType type) {
         switch (type) {
             case ARRAY_INT:
+                this.values = values;
                 break;
             case ARRAY_DOUBLE:
+                this.values = values;
                 break;
             default:
-                throw new LauncherException();
+                throw new LauncherException("Internal error: Invalid function call of 'Variable(String[] values, VariableType type)'");
         }
         this.length = values.length;
         this.type = type;
     }
 
+    public Variable(Variable variable) {
+        values = variable.values;
+        length = variable.length;
+        type = variable.type;
+    }
+
+    public void assign(Variable variable) {
+        values = variable.values;
+        length = variable.length;
+        type = variable.type;
+    }
+
+    public void assignChild(String value, int index) {
+        values[index] = value;
+    }
+
     public int getIntValue() {
         if (type == INT)
             return Integer.valueOf(values[0]);
-        throw new LauncherException();
+        throw new LauncherException("Internal error: Invalid function call of 'getIntValue()'");
     }
 
     public double getDoubleValue() {
         if (type == DOUBLE)
             return Double.valueOf(values[0]);
-        throw new LauncherException();
-    }
-
-    public int[] getIntArray() {
-        if (type == ARRAY_INT) {
-            int[] result = new int[length];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = Integer.valueOf(values[i]);
-            }
-            return result;
-        }
-        throw new LauncherException();
-    }
-
-    public double[] getDoubleArray() {
-        if (type == ARRAY_DOUBLE) {
-            double[] result = new double[length];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = Double.valueOf(values[i]);
-            }
-            return result;
-        }
-        throw new LauncherException();
+        throw new LauncherException("Internal error: Invalid function call of 'getDoubleValue()'");
     }
 
     public String getValue() {
@@ -76,6 +73,10 @@ public class Variable {
 
     public String[] getValues() {
         return values;
+    }
+
+    public int getLength() {
+        return length;
     }
 
     public VariableType getType() {

@@ -28,6 +28,10 @@ public class TreeNode {
         return children;
     }
 
+    public TreeNode getChild(int index) {
+        return children.get(index);
+    }
+
     public TreeNode addChild(TreeNode child) {
         children.add(child);
         return this;

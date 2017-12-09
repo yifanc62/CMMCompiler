@@ -14,9 +14,9 @@ public class VariableTable {
         parent = null;
     }
 
-    public VariableTable(VariableTable parent) {
-        varMap = new HashMap<>();
-        child = null;
+    private VariableTable(VariableTable parent) {
+        this.varMap = new HashMap<>();
+        this.child = null;
         this.parent = parent;
     }
 
@@ -30,9 +30,15 @@ public class VariableTable {
     }
 
     public void put(String name, String value, VariableType type, int line) {
-        if (!varMap.containsKey(name))
-            varMap.put(name, new Variable(value, type));
-        throw new LauncherException(String.format("[line: %d]Runtime error: Duplication variable name '%s'", line, name));
+        if (varMap.containsKey(name))
+            throw new LauncherException(String.format("Redefined variable '%s'", name), line);
+        varMap.put(name, new Variable(value, type));
+    }
+
+    public void put(String name, String[] values, VariableType type, int line) {
+        if (varMap.containsKey(name))
+            throw new LauncherException(String.format("Redefined variable '%s'", name), line);
+        varMap.put(name, new Variable(values, type));
     }
 
     public Variable get(String name, int line) {
@@ -40,6 +46,6 @@ public class VariableTable {
             return varMap.get(name);
         if (parent != null)
             return parent.get(name, line);
-        throw new LauncherException(String.format("[line: %d]Runtime error: Variable '%s' not found", line, name));
+        throw new LauncherException(String.format("Unknown variable '%s'", name), line);
     }
 }

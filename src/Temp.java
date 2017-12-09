@@ -1,9 +1,13 @@
 import Lexic.Lexer;
 import Lexic.TokenStream;
+import Semantic.Command;
+import Semantic.Compiler;
 import Syntactic.Parser;
 import Syntactic.TreeNode;
+import VirtualMachine.Launcher;
 
 import java.io.FileInputStream;
+import java.util.List;
 
 import static Util.Util.*;
 
@@ -27,7 +31,14 @@ public class Temp {
                         printParserError(parser);
                         return;
                     }
-                    printTreeNode(root);
+                    Compiler compiler = new Compiler(root);
+                    List<Command> commands = compiler.compile();
+                    if (!compiler.isSuccess()) {
+                        printCompilerError(compiler);
+                        return;
+                    }
+                    Launcher launcher = new Launcher(commands);
+                    launcher.launch(System.in, System.out, System.err);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

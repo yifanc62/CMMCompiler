@@ -3,8 +3,12 @@ package Util;
 import Lexic.Token;
 import Lexic.TokenStream;
 import Lexic.TokenType;
+import Semantic.Command;
+import Semantic.Compiler;
 import Syntactic.Parser;
 import Syntactic.TreeNode;
+
+import java.util.List;
 
 public class Util {
     public static void printToken(TokenStream tokenStream) {
@@ -27,6 +31,12 @@ public class Util {
 
     public static void printParserError(Parser parser) {
         for (Exception e : parser.getExceptions()) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public static void printCompilerError(Compiler compiler) {
+        for (Exception e : compiler.getExceptions()) {
             System.out.println(e.getMessage());
         }
     }
@@ -72,5 +82,15 @@ public class Util {
             String result = builder.toString();
             return result.substring(0, result.length() - 2);
         }
+    }
+
+    public static String commandListToString(List<Command> commands) {
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        for (Command command : commands) {
+            builder.append(command.encode());
+            builder.append("\r\n");
+        }
+        return builder.toString();
     }
 }
