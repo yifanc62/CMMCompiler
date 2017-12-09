@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.swt.widgets.Text;
+
 import static VirtualMachine.VariableType.*;
 
 public class Launcher {
@@ -128,6 +130,92 @@ public class Launcher {
             err.println(e.getMessage());
         } catch (Exception e) {
             err.println(String.format("Unexpected runtime exception %s: %s", e.getClass().getName(), e.getMessage()));
+        }
+    }
+    
+    public void launch(InputStream inputStream, OutputStream outputStream, OutputStream errorStream, Text outText) {
+        BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+        PrintStream out = new PrintStream(outputStream);
+        PrintStream err = new PrintStream(errorStream);
+        try {
+            while (true) {
+                Command current = cmdList.get(p);
+                switch (current.getType()) {
+                    case CMP:
+                        cmp(current);
+                        break;
+                    case JMP:
+                        jmp(current);
+                        break;
+                    case JE:
+                        je(current);
+                        break;
+                    case JNE:
+                        jne(current);
+                        break;
+                    case JG:
+                        jg(current);
+                        break;
+                    case JGE:
+                        jge(current);
+                        break;
+                    case JL:
+                        jl(current);
+                        break;
+                    case JLE:
+                        jle(current);
+                        break;
+                    case DEF:
+                        def(current);
+                        break;
+                    case MOV:
+                        mov(current);
+                        break;
+                    case IN:
+                        in();
+                        break;
+                    case OUT:
+                        out();
+                        break;
+                    case PUSH:
+                        push(current);
+                        break;
+                    case POP:
+                        pop(current);
+                        break;
+                    case ADD:
+                        add();
+                        break;
+                    case SUB:
+                        sub();
+                        break;
+                    case MUL:
+                        mul();
+                        break;
+                    case DIV:
+                        div();
+                        break;
+                    case MOD:
+                        mod();
+                        break;
+                    case SC:
+                        sc(current, in, err);
+                        break;
+                    case PR:
+                        pr(current, outText);
+                        break;
+                    case EXIT:
+                        return;
+                }
+            }
+        } catch (LauncherException e) {
+        	outText.append("错误信息:\n");
+        	outText.append(e.getMessage());
+            outText.append(System.getProperty("line.separator"));
+        } catch (Exception e) {
+        	outText.append("错误信息:\n");
+        	outText.append(String.format("Unexpected runtime exception %s: %s", e.getClass().getName(), e.getMessage()));
+        	outText.append(System.getProperty("line.separator"));
         }
     }
 
@@ -653,6 +741,32 @@ public class Launcher {
                     out.println(ebx.getValue() + ".0");
                 else
                     out.println(ebx.getValue());
+                break;
+            default:
+                throw new LauncherException("Internal error: SC command invalid");
+        }
+        p++;
+    }
+    
+    private void pr(Command current, Text outText) throws IOException {
+        switch (current.getArg0()) {
+            case "<":
+                if (eax.getType() == DOUBLE && !eax.getValue().contains(".")) {
+                	outText.append(eax.getValue() + ".0");
+                	outText.append(System.getProperty("line.separator"));
+                }else {
+                	outText.append(eax.getValue());
+                	outText.append(System.getProperty("line.separator"));
+                }  
+                break;
+            case ">":
+                if (ebx.getType() == DOUBLE && !ebx.getValue().contains(".")) {
+                	outText.append(ebx.getValue() + ".0");
+                	outText.append(System.getProperty("line.separator"));
+                }else {
+                	outText.append(ebx.getValue());
+                	outText.append(System.getProperty("line.separator"));
+                }
                 break;
             default:
                 throw new LauncherException("Internal error: SC command invalid");
