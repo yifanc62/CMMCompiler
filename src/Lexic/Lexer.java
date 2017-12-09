@@ -12,6 +12,7 @@ public class Lexer {
     private int currentPosition;
     private int currentTokenPosition;
     private int currentIndex;
+    private int currentTokenIndex;
     private LexerStatus currentStatus;
     private String currentValue;
     private boolean rollback;
@@ -46,6 +47,7 @@ public class Lexer {
         currentPosition = 1;
         currentTokenPosition = 1;
         currentIndex = 0;
+        currentTokenIndex = 0;
         currentStatus = LexerStatus.START;
         currentValue = "";
         rollback = false;
@@ -80,92 +82,92 @@ public class Lexer {
             case START:
                 switch (input) {
                     case 'i':
-                        setStatusAppendingValue(LexerStatus.K_I, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_I, input, currentPosition, currentIndex);
                         break;
                     case 'e':
-                        setStatusAppendingValue(LexerStatus.K_E, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_E, input, currentPosition, currentIndex);
                         break;
                     case 'w':
-                        setStatusAppendingValue(LexerStatus.K_W, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_W, input, currentPosition, currentIndex);
                         break;
                     case 'b':
-                        setStatusAppendingValue(LexerStatus.K_B, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_B, input, currentPosition, currentIndex);
                         break;
                     case 'r':
-                        setStatusAppendingValue(LexerStatus.K_R, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_R, input, currentPosition, currentIndex);
                         break;
                     case 'd':
-                        setStatusAppendingValue(LexerStatus.K_D, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_D, input, currentPosition, currentIndex);
                         break;
                     case 't':
-                        setStatusAppendingValue(LexerStatus.K_T, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_T, input, currentPosition, currentIndex);
                         break;
                     case 'f':
-                        setStatusAppendingValue(LexerStatus.K_F, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.K_F, input, currentPosition, currentIndex);
                         break;
                     case '=':
-                        setStatusAppendingValue(LexerStatus.S_ASSIGN, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.S_ASSIGN, input, currentPosition, currentIndex);
                         break;
                     case '/':
-                        setStatusAppendingValue(LexerStatus.S_SLASH, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.S_SLASH, input, currentPosition, currentIndex);
                         break;
                     case '>':
-                        setStatusAppendingValue(LexerStatus.S_G, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.S_G, input, currentPosition, currentIndex);
                         break;
                     case '<':
-                        setStatusAppendingValue(LexerStatus.S_L, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.S_L, input, currentPosition, currentIndex);
                         break;
                     case '!':
-                        setStatusAppendingValue(LexerStatus.S_EXCLAMATION, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.S_EXCLAMATION, input, currentPosition, currentIndex);
                         break;
                     case '0':
-                        setStatusAppendingValue(LexerStatus.V_ZERO, input, currentPosition);
+                        setStatusAppendingValue(LexerStatus.V_ZERO, input, currentPosition, currentIndex);
                         break;
                     case '+':
-                        addTokenAppendingValue(TokenType.S_PLUS, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_PLUS, input, currentPosition, currentIndex);
                         break;
                     case '-':
-                        addTokenAppendingValue(TokenType.S_MINUS, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_MINUS, input, currentPosition, currentIndex);
                         break;
                     case '*':
-                        addTokenAppendingValue(TokenType.S_MULTIPLY, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_MULTIPLY, input, currentPosition, currentIndex);
                         break;
                     case '%':
-                        addTokenAppendingValue(TokenType.S_MOD, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_MOD, input, currentPosition, currentIndex);
                         break;
                     case '(':
-                        addTokenAppendingValue(TokenType.S_PARENTHESIS_L, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_PARENTHESIS_L, input, currentPosition, currentIndex);
                         break;
                     case ')':
-                        addTokenAppendingValue(TokenType.S_PARENTHESIS_R, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_PARENTHESIS_R, input, currentPosition, currentIndex);
                         break;
                     case '[':
-                        addTokenAppendingValue(TokenType.S_BRACKET_L, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_BRACKET_L, input, currentPosition, currentIndex);
                         break;
                     case ']':
-                        addTokenAppendingValue(TokenType.S_BRACKET_R, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_BRACKET_R, input, currentPosition, currentIndex);
                         break;
                     case '{':
-                        addTokenAppendingValue(TokenType.S_BRACE_L, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_BRACE_L, input, currentPosition, currentIndex);
                         break;
                     case '}':
-                        addTokenAppendingValue(TokenType.S_BRACE_R, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_BRACE_R, input, currentPosition, currentIndex);
                         break;
                     case ',':
-                        addTokenAppendingValue(TokenType.S_COMMA, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_COMMA, input, currentPosition, currentIndex);
                         break;
                     case ';':
-                        addTokenAppendingValue(TokenType.S_SEMICOLON, input, currentPosition);
+                        addTokenAppendingValue(TokenType.S_SEMICOLON, input, currentPosition, currentIndex);
                         break;
                     default:
                         if (isSkippable(input)) {
                             break;
                         } else if (isNum(input)) {
-                            setStatusAppendingValue(LexerStatus.V_INT, input, currentPosition);
+                            setStatusAppendingValue(LexerStatus.V_INT, input, currentPosition, currentIndex);
                         } else if (isIdentifier(input)) {
-                            setStatusAppendingValue(LexerStatus.V_VAR, input, currentPosition);
+                            setStatusAppendingValue(LexerStatus.V_VAR, input, currentPosition, currentIndex);
                         } else {
-                            addTokenAppendingValue(TokenType.E_UNRECOGNIZED, input, currentPosition);
+                            addTokenAppendingValue(TokenType.E_UNRECOGNIZED, input, currentPosition, currentIndex);
                         }
                         break;
                 }
@@ -881,10 +883,11 @@ public class Lexer {
         currentValue += c;
     }
 
-    private void setStatusAppendingValue(LexerStatus newStatus, char c, int newPosition) {
+    private void setStatusAppendingValue(LexerStatus newStatus, char c, int newPosition, int newIndex) {
         currentStatus = newStatus;
         currentValue += c;
         currentTokenPosition = newPosition;
+        currentTokenIndex = newIndex;
     }
 
     private void setStatusResetValue(LexerStatus newStatus) {
@@ -894,38 +897,38 @@ public class Lexer {
 
     private void addToken(TokenType type) {
         setStatus(LexerStatus.START);
-        result.add(new Token(currentLine, currentTokenPosition, currentIndex, type, currentValue));
+        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue));
         resetValue();
     }
 
     private void addTokenAppendingValue(TokenType type, char input) {
         setStatusAppendingValue(LexerStatus.START, input);
-        result.add(new Token(currentLine, currentTokenPosition, currentIndex, type, currentValue));
+        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue));
         resetValue();
     }
 
-    private void addTokenAppendingValue(TokenType type, char input, int newPosition) {
-        setStatusAppendingValue(LexerStatus.START, input, newPosition);
-        result.add(new Token(currentLine, currentTokenPosition, currentIndex, type, currentValue));
+    private void addTokenAppendingValue(TokenType type, char input, int newPosition, int newIndex) {
+        setStatusAppendingValue(LexerStatus.START, input, newPosition, newIndex);
+        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue));
         resetValue();
     }
 
     private void addTokenRollback(TokenType type) {
         setStatus(LexerStatus.START);
-        result.add(new Token(currentLine, currentTokenPosition, currentIndex, type, currentValue));
+        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue));
         resetValue();
         rollback = true;
     }
 
     private void addHexToken(TokenType type) {
         setStatus(LexerStatus.START);
-        result.add(new Token(currentLine, currentTokenPosition, currentIndex, type, currentValue).setValueWithoutLength(Integer.valueOf(currentValue, 16).toString()));
+        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue).setValueWithoutLength(Integer.valueOf(currentValue, 16).toString()));
         resetValue();
     }
 
     private void addHexTokenRollback(TokenType type) {
         setStatus(LexerStatus.START);
-        result.add(new Token(currentLine, currentTokenPosition, currentIndex, type, currentValue).setValueWithoutLength(Integer.valueOf(currentValue, 16).toString()));
+        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue).setValueWithoutLength(Integer.valueOf(currentValue, 16).toString()));
         resetValue();
         rollback = true;
     }
