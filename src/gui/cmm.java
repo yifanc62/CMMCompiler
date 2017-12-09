@@ -353,7 +353,7 @@ public class cmm {
 				}
 			}
 		});
-		mntmRun.setText("解释执行");
+		mntmRun.setText("执行");
 
 		MenuItem mntmAbout = new MenuItem(menu, SWT.NONE);
 		mntmAbout.addSelectionListener(new SelectionAdapter() {
