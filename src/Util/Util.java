@@ -10,77 +10,84 @@ import Syntactic.TreeNode;
 
 import java.util.List;
 
-import org.eclipse.swt.widgets.Text;
-
 public class Util {
     public static void printToken(TokenStream tokenStream) {
         tokenStream = new TokenStream(tokenStream);
         while (!tokenStream.endOfStream()) {
             Token token = tokenStream.pop();
-            System.out.println(String.format("[line: %d, position: %d]type: %s, value: %s", token.getLine(), token.getPosition(), token.getType(), token.getValue()));
+            System.out.println(String.format("[line: %d, position: %d]type: %s, value: %s", token.getLine(), token.getPosition(), token.getType().name(), token.getValue()));
         }
     }
-    
-    public static void outputToken(TokenStream tokenStream, Text outText) {
-    	tokenStream = new TokenStream(tokenStream);
-		outText.append("分析结果：\n");
+
+    public static String outputToken(TokenStream tokenStream) {
+        tokenStream = new TokenStream(tokenStream);
+        StringBuilder outText = new StringBuilder();
+        outText.append("词法分析结果：\r\n");
         while (!tokenStream.endOfStream()) {
             Token token = tokenStream.pop();
-            outText.append(String.format("[line: %d, position: %d]type: %s, value: %s", token.getLine(), token.getPosition(), token.getType(), token.getValue()));
-            outText.append(System.getProperty("line.separator"));
+            outText.append(String.format("[line: %d, position: %d]type: %s, value: %s\r\n", token.getLine(), token.getPosition(), token.getType().name(), token.getValue()));
         }
+        return outText.toString();
     }
 
     public static void printLexerError(TokenStream tokenStream) {
         for (Token token : tokenStream.getErrors()) {
             if (token.getType().isUnrecognized()) {
-                System.out.println(String.format("[line: %d, position: %d]Unrecognized char: '%s'", token.getLine(), token.getPosition(), token.getValue()));
+                System.out.println(String.format("[line: %d, position: %d]Unrecognized char: '%s'.", token.getLine(), token.getPosition(), token.getValue()));
+            } else if (token.getType().isValueInvalid()) {
+                System.out.println(String.format("[line: %d, position: %d]Value not invalid: '%s'.", token.getLine(), token.getPosition(), token.getValue()));
             } else {
-                System.out.println(String.format("[line: %d, position: %d]Comment block not closed", token.getLine(), token.getPosition()));
+                System.out.println(String.format("[line: %d, position: %d]Comment block not closed.", token.getLine(), token.getPosition()));
             }
         }
     }
 
-    public static void outputLexerError(TokenStream tokenStream, Text outText) {
-    	outText.append("错误信息：\n");
+    public static String outputLexerError(TokenStream tokenStream) {
+        StringBuilder outText = new StringBuilder();
+        outText.append("词法分析错误信息：\r\n");
         for (Token token : tokenStream.getErrors()) {
             if (token.getType().isUnrecognized()) {
-            	outText.append(String.format("[line: %d, position: %d]Unrecognized char: '%s'", token.getLine(), token.getPosition(), token.getValue()));
-            	outText.append(System.getProperty("line.separator"));
+                outText.append(String.format("[line: %d, position: %d]Unrecognized char: '%s'.\r\n", token.getLine(), token.getPosition(), token.getValue()));
+            } else if (token.getType().isValueInvalid()) {
+                outText.append(String.format("[line: %d, position: %d]Value not invalid: '%s'.\r\n", token.getLine(), token.getPosition(), token.getValue()));
             } else {
-                outText.append(String.format("[line: %d, position: %d]Comment block not closed", token.getLine(), token.getPosition()));
-                outText.append(System.getProperty("line.separator"));
+                outText.append(String.format("[line: %d, position: %d]Comment block not closed.\r\n", token.getLine(), token.getPosition()));
             }
         }
-	}
-    
+        return outText.toString();
+    }
+
     public static void printParserError(Parser parser) {
         for (Exception e : parser.getExceptions()) {
             System.out.println(e.getMessage());
         }
     }
-    
-    public static void outputParserError(Parser parser, Text outText) {
-    	outText.append("错误信息：\n");
-    	for (Exception e : parser.getExceptions()) {
-    		outText.append(e.getMessage());
-    		outText.append(System.getProperty("line.separator"));
+
+    public static String outputParserError(Parser parser) {
+        StringBuilder outText = new StringBuilder();
+        outText.append("语法分析错误信息：\r\n");
+        for (Exception e : parser.getExceptions()) {
+            outText.append(e.getMessage());
+            outText.append("\r\n");
         }
-	}
+        return outText.toString();
+    }
 
     public static void printCompilerError(Compiler compiler) {
         for (Exception e : compiler.getExceptions()) {
             System.out.println(e.getMessage());
         }
     }
-    
-    public static void outputCompilerError(Compiler compiler, Text outText) {
-    	outText.append("错误信息：\n");
-    	for (Exception e : compiler.getExceptions()) {
-    		outText.append(e.getMessage());
-    		outText.append(System.getProperty("line.separator"));
+
+    public static String outputCompilerError(Compiler compiler) {
+        StringBuilder outText = new StringBuilder();
+        outText.append("语义分析错误信息：\r\n");
+        for (Exception e : compiler.getExceptions()) {
+            outText.append(e.getMessage());
+            outText.append("\r\n");
         }
-	}
+        return outText.toString();
+    }
 
     public static void printTreeNode(TreeNode root) {
         if (root == null) {
@@ -94,23 +101,24 @@ public class Util {
             System.out.println(root.getType().toString() + (root.getValue() == null ? "" : ": " + root.getValue()));
         }
     }
-    
-    public static void outputTreeNode(TreeNode root, Text outText) {
-    	outText.append("分析结果：\n");
-    	 if (root == null) {
-    		 outText.append("NULL");
-    		 outText.append(System.getProperty("line.separator"));
-         } else if (!root.getChildren().isEmpty()) {
-        	 outText.append(root.getType().toString());
-        	 outText.append(System.getProperty("line.separator"));
-             for (TreeNode child : root.getChildren()) {
-                 outputTreeNode(child, 1, outText);
-             }
-         } else {
-        	 outText.append(root.getType().toString() + (root.getValue() == null ? "" : ": " + root.getValue()));
-        	 outText.append(System.getProperty("line.separator"));
-         }
-	}
+
+    public static String outputTreeNode(TreeNode root) {
+        StringBuilder outText = new StringBuilder();
+        outText.append("语法分析结果：\r\n");
+        if (root == null) {
+            outText.append("NULL\r\n");
+        } else if (!root.getChildren().isEmpty()) {
+            outText.append(root.getType().toString());
+            outText.append("\r\n");
+            for (TreeNode child : root.getChildren()) {
+                outText.append(outputTreeNode(child, 1));
+            }
+        } else {
+            outText.append(root.getType().toString()).append(root.getValue() == null ? "" : ": " + root.getValue());
+            outText.append("\r\n");
+        }
+        return outText.toString();
+    }
 
     private static void printTreeNode(TreeNode node, int indent) {
         for (int i = 0; i < indent; i++) {
@@ -127,25 +135,26 @@ public class Util {
             System.out.println(node.getType().toString() + (node.getValue() == null ? "" : ": " + node.getValue()));
         }
     }
-    
-    private static void outputTreeNode(TreeNode node, int indent, Text outText) {
+
+    private static String outputTreeNode(TreeNode node, int indent) {
+        StringBuilder outText = new StringBuilder();
         for (int i = 0; i < indent; i++) {
-        	outText.append("\t");
+            outText.append("\t");
         }
         if (node == null) {
-        	outText.append("NULL");
-        	outText.append(System.getProperty("line.separator"));
+            outText.append("NULL\r\n");
         } else if (!node.getChildren().isEmpty()) {
-        	outText.append(node.getType().toString());
-        	outText.append(System.getProperty("line.separator"));
+            outText.append(node.getType().toString());
+            outText.append("\r\n");
             for (TreeNode child : node.getChildren()) {
-                outputTreeNode(child, indent + 1, outText);
+                outText.append(outputTreeNode(child, indent + 1));
             }
         } else {
-        	outText.append(node.getType().toString() + (node.getValue() == null ? "" : ": " + node.getValue()));
-            outText.append(System.getProperty("line.separator"));
+            outText.append(node.getType().toString()).append(node.getValue() == null ? "" : ": " + node.getValue());
+            outText.append("\r\n");
         }
-	}
+        return outText.toString();
+    }
 
     public static String tokenTypesToString(TokenType... types) {
         if (types.length == 0) {
@@ -163,18 +172,22 @@ public class Util {
 
     public static String commandListToString(List<Command> commands) {
         StringBuilder builder = new StringBuilder();
-        int i = 0;
         for (Command command : commands) {
             builder.append(command.encode());
             builder.append("\r\n");
         }
         return builder.toString();
     }
-    
-    public static void outputCommandList(List<Command> commands, Text outText) {
-    	for (Command command : commands) {
-    		outText.append(command.encode());
-    		outText.append(System.getProperty("line.separator"));
+
+    public static String outputCommandList(List<Command> commands) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("可执行中间代码：\r\n");
+        for (int i = 0; i < commands.size(); i++) {
+            builder.append(i);
+            builder.append(" ");
+            builder.append(commands.get(i).encode());
+            builder.append("\r\n");
         }
+        return builder.toString().replaceAll("<", "eax").replaceAll(">", "ebx");
     }
 }

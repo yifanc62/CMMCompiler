@@ -38,6 +38,7 @@ public class Temp {
                         return;
                     }
                     Launcher launcher = new Launcher(commands);
+                    System.out.println(commandListToString(commands));
                     launcher.launch(System.in, System.out, System.err);
                 } catch (Exception e) {
                     e.printStackTrace();

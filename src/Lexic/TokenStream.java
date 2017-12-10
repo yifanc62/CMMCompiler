@@ -21,10 +21,10 @@ public class TokenStream {
     }
 
     public boolean containErrors() {
-        return getErrors().isEmpty();
+        return !getErrors().isEmpty();
     }
 
-    private List<Token> getAllTokens() {
+    public List<Token> getAllTokens() {
         return tokens;
     }
 

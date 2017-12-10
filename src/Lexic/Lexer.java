@@ -682,27 +682,57 @@ public class Lexer {
                 } else if (input == '.') {
                     setStatusAppendingValue(LexerStatus.V_DOUBLE, input);
                 } else if (isSkippable(input)) {
-                    addToken(TokenType.V_INT);
+                    try {
+                        int i = Integer.valueOf(currentValue);
+                        addToken(TokenType.V_INT);
+                    } catch (Exception e) {
+                        addToken(TokenType.E_VALUE);
+                    }
                 } else {
-                    addTokenRollback(TokenType.V_INT);
+                    try {
+                        int i = Integer.valueOf(currentValue);
+                        addTokenRollback(TokenType.V_INT);
+                    } catch (Exception e) {
+                        addTokenRollback(TokenType.E_VALUE);
+                    }
                 }
                 break;
             case V_HEX:
                 if (isHexChar(input)) {
                     appendingValue(input);
                 } else if (isSkippable(input)) {
-                    addHexToken(TokenType.V_INT);
+                    try {
+                        int i = Integer.valueOf(currentValue, 16);
+                        addHexToken(TokenType.V_INT);
+                    } catch (Exception e) {
+                        addHexToken(TokenType.E_VALUE);
+                    }
                 } else {
-                    addHexTokenRollback(TokenType.V_INT);
+                    try {
+                        int i = Integer.valueOf(currentValue, 16);
+                        addHexTokenRollback(TokenType.V_INT);
+                    } catch (Exception e) {
+                        addHexTokenRollback(TokenType.E_VALUE);
+                    }
                 }
                 break;
             case V_DOUBLE:
                 if (isNum(input)) {
                     appendingValue(input);
                 } else if (isSkippable(input)) {
-                    addToken(TokenType.V_DOUBLE);
+                    try {
+                        double d = Double.valueOf(currentValue);
+                        addToken(TokenType.V_DOUBLE);
+                    } catch (Exception e) {
+                        addToken(TokenType.E_VALUE);
+                    }
                 } else {
-                    addTokenRollback(TokenType.V_DOUBLE);
+                    try {
+                        double d = Double.valueOf(currentValue);
+                        addTokenRollback(TokenType.V_DOUBLE);
+                    } catch (Exception e) {
+                        addTokenRollback(TokenType.E_VALUE);
+                    }
                 }
                 break;
             case V_ZERO:
@@ -713,9 +743,19 @@ public class Lexer {
                 } else if (isNum(input)) {
                     setStatusAppendingValue(LexerStatus.V_INT, input);
                 } else if (isSkippable(input)) {
-                    addToken(TokenType.V_INT);
+                    try {
+                        int i = Integer.valueOf(currentValue);
+                        addToken(TokenType.V_INT);
+                    } catch (Exception e) {
+                        addToken(TokenType.E_VALUE);
+                    }
                 } else {
-                    addTokenRollback(TokenType.V_INT);
+                    try {
+                        int i = Integer.valueOf(currentValue);
+                        addTokenRollback(TokenType.V_INT);
+                    } catch (Exception e) {
+                        addTokenRollback(TokenType.E_VALUE);
+                    }
                 }
                 break;
             case V_VAR:
@@ -745,7 +785,7 @@ public class Lexer {
                 if (input == '/') {
                     addTokenAppendingValue(TokenType.C, input);
                 } else {
-                    appendingValue(input);
+                    setStatusAppendingValue(LexerStatus.C_B, input);
                 }
                 break;
         }
@@ -838,16 +878,36 @@ public class Lexer {
                 addToken(TokenType.S_ASSIGN);
                 break;
             case V_INT:
-                addToken(TokenType.V_INT);
+                try {
+                    int i = Integer.valueOf(currentValue);
+                    addToken(TokenType.V_INT);
+                } catch (Exception e) {
+                    addToken(TokenType.E_VALUE);
+                }
                 break;
             case V_HEX:
-                addHexToken(TokenType.V_INT);
+                try {
+                    int i = Integer.valueOf(currentValue, 16);
+                    addHexToken(TokenType.V_INT);
+                } catch (Exception e) {
+                    addHexToken(TokenType.E_VALUE);
+                }
                 break;
             case V_DOUBLE:
-                addToken(TokenType.V_DOUBLE);
+                try {
+                    double d = Double.valueOf(currentValue);
+                    addToken(TokenType.V_DOUBLE);
+                } catch (Exception e) {
+                    addToken(TokenType.E_VALUE);
+                }
                 break;
             case V_ZERO:
-                addToken(TokenType.V_INT);
+                try {
+                    int i = Integer.valueOf(currentValue);
+                    addToken(TokenType.V_INT);
+                } catch (Exception e) {
+                    addToken(TokenType.E_VALUE);
+                }
                 break;
             case V_VAR:
                 addToken(TokenType.V_VARIABLE);
@@ -922,13 +982,19 @@ public class Lexer {
 
     private void addHexToken(TokenType type) {
         setStatus(LexerStatus.START);
-        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue).setValueWithoutLength(Integer.valueOf(currentValue, 16).toString()));
+        if (type != TokenType.V_INT)
+            result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, "0x" + currentValue));
+        else
+            result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, "0x" + currentValue).setValueWithoutLength(Integer.valueOf(currentValue.equals("") ? "0" : currentValue, 16).toString()));
         resetValue();
     }
 
     private void addHexTokenRollback(TokenType type) {
         setStatus(LexerStatus.START);
-        result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, currentValue).setValueWithoutLength(Integer.valueOf(currentValue, 16).toString()));
+        if (type != TokenType.V_INT)
+            result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, "0x" + currentValue));
+        else
+            result.add(new Token(currentLine, currentTokenPosition, currentTokenIndex, type, "0x" + currentValue).setValueWithoutLength(Integer.valueOf(currentValue.equals("") ? "0" : currentValue, 16).toString()));
         resetValue();
         rollback = true;
     }

@@ -38,6 +38,8 @@ public class Parser {
     }
 
     private TreeNode parseProgram() throws UnexpectedEOFException {
+        if (input.endOfStream())
+            return null;
         TreeNode programNode = new TreeNode(NodeType.PROGRAM).setLine(input.peek().getLine());
         while (!input.endOfStream()) {
             programNode.addChild(parseStatement());
@@ -47,6 +49,7 @@ public class Parser {
 
     private TreeNode parseStatement() throws UnexpectedEOFException {
         try {
+            check();
             Token next = input.peek();
             TokenType type = next.getType();
             if (type == K_STMT_IF) {
@@ -76,6 +79,7 @@ public class Parser {
         } catch (UnexpectedTokenException e) {
             exceptions.add(e);
             //短语层错误恢复
+            check();
             while (!(input.peek().getType().isOneOf(e.getStartTypes()) || input.peek().getType().isOneOf(e.getEndTypes()))) {
                 input.pop();
                 check();
@@ -418,6 +422,7 @@ public class Parser {
         if (next.getType().isVariable()) {
             input.pop();
             idNode.addChild(new TreeNode(NodeType.NAME).setValue(next.getValue()).setLine(next.getLine()));
+            check();
             if (input.peek().getType() == S_ASSIGN) {
                 input.pop();
                 idNode.addChild(parseExpressionArithmetical());
@@ -455,10 +460,12 @@ public class Parser {
                 continue;
             }
             idNode = new TreeNode(NodeType.IDENTIFIER);
+            check();
             idNode.setLine((next = input.peek()).getLine());
             if (next.getType().isVariable()) {
                 input.pop();
                 idNode.addChild(new TreeNode(NodeType.NAME).setValue(next.getValue()).setLine(next.getLine()));
+                check();
                 if (input.peek().getType() == S_ASSIGN) {
                     input.pop();
                     idNode.addChild(parseExpressionArithmetical());
@@ -734,6 +741,7 @@ public class Parser {
 
     private TreeNode parseFactor() throws UnexpectedEOFException {
         TreeNode factorNode = new TreeNode(NodeType.FACTOR);
+        check();
         Token next = input.peek();
         factorNode.setLine(next.getLine());
         if (next.getType() == S_PARENTHESIS_L) {

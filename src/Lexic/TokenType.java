@@ -39,7 +39,8 @@ public enum TokenType {
     S_SEMICOLON,
     C,
     E_UNRECOGNIZED,
-    E_COMMENT;
+    E_COMMENT,
+    E_VALUE;
 
     public boolean isStatement() {
         return Arrays.asList(K_STMT_IF, K_STMT_ELSE, K_STMT_WHILE, K_STMT_BREAK, K_STMT_FOR).contains(this);
@@ -93,8 +94,12 @@ public enum TokenType {
         return this == E_COMMENT;
     }
 
+    public boolean isValueInvalid() {
+        return this == E_VALUE;
+    }
+
     public boolean isError() {
-        return isUnrecognized() || isCommentNotClosed();
+        return isUnrecognized() || isCommentNotClosed() || isValueInvalid();
     }
 
     public boolean isOneOf(TokenType... types) {
