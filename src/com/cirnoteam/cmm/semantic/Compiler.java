@@ -51,6 +51,10 @@ public class Compiler {
                 result = newResult;
                 newResult = (optimizer = new Optimizer(result)).optimize();
             }
+            if (!optimizer.isSuccess()) {
+                exceptions.addAll(optimizer.getExceptions());
+                return newResult;
+            }
         }
         return result;
     }
