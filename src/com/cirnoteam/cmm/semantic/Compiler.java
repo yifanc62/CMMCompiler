@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.cirnoteam.cmm.semantic.CommandType.*;
-import static com.cirnoteam.cmm.semantic.Optimizer.optimize;
 import static com.cirnoteam.cmm.semantic.VariableType.*;
 import static com.cirnoteam.cmm.syntactic.NodeType.*;
 
@@ -42,10 +41,15 @@ public class Compiler {
         addCommands(compileBlock(programNode, true, null, 0));
         addCommand(new Command(EXIT, null, null, null));
         if (optimize) {
-            List<Command> newResult = optimize(result);
+            Optimizer optimizer = new Optimizer(result);
+            List<Command> newResult = optimizer.optimize();
             while (result.size() != newResult.size()) {
+                if (!optimizer.isSuccess()) {
+                    exceptions.addAll(optimizer.getExceptions());
+                    return newResult;
+                }
                 result = newResult;
-                newResult = optimize(result);
+                newResult = (optimizer = new Optimizer(result)).optimize();
             }
         }
         return result;

@@ -64,11 +64,102 @@ public class Window {
     }
 
     public static void main(String[] args) {
-        try {
-            Window window = new Window();
-            window.open();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (args.length == 0) {
+            try {
+                Window window = new Window();
+                window.open();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                if (args.length == 1) {
+                    Lexer lexer = new Lexer(new FileInputStream(args[0]));
+                    TokenStream tokenStream = lexer.getTokens();
+                    if (tokenStream.containErrors()) {
+                        printLexerError(tokenStream);
+                        return;
+                    }
+                    Parser parser = new Parser(tokenStream.reduceErrors());
+                    TreeNode root = parser.parse();
+                    if (!parser.isSuccess()) {
+                        printParserError(parser);
+                        return;
+                    }
+                    Compiler compiler = new Compiler(root);
+                    List<Command> commandList = compiler.compile();
+                    if (!compiler.isSuccess()) {
+                        printCompilerError(compiler);
+                        return;
+                    }
+                    Launcher launcher = new Launcher(commandList);
+                    launcher.launch(System.in, System.out, System.err);
+                    return;
+                }
+                String file = null;
+                String output = null;
+                String iOutput = null;
+                boolean optimize = true;
+                for (int i = 0; i < args.length; i++) {
+                    String arg = args[i];
+                    if (arg.equalsIgnoreCase("-o")) {
+                        if (i == args.length - 1)
+                            throw new Exception();
+                        output = args[++i];
+                    } else if (arg.equalsIgnoreCase("-i")) {
+                        if (i == args.length - 1)
+                            throw new Exception();
+                        iOutput = args[++i];
+                    } else if (arg.equalsIgnoreCase("-n")) {
+                        optimize = false;
+                    } else {
+                        file = arg;
+                    }
+                }
+                if (file == null)
+                    throw new Exception();
+                if (output != null) {
+                    File outputFile = new File(output);
+                    if (!outputFile.exists())
+                        if (!outputFile.createNewFile())
+                            throw new IOException();
+                }
+                if (iOutput != null) {
+                    File outputFile = new File(iOutput);
+                    if (!outputFile.exists())
+                        if (!outputFile.createNewFile())
+                            throw new IOException();
+                }
+                Lexer lexer = new Lexer(new FileInputStream(file));
+                TokenStream tokenStream = lexer.getTokens();
+                if (tokenStream.containErrors()) {
+                    printLexerError(tokenStream);
+                    return;
+                }
+                Parser parser = new Parser(tokenStream.reduceErrors());
+                TreeNode root = parser.parse();
+                if (!parser.isSuccess()) {
+                    printParserError(parser);
+                    return;
+                }
+                Compiler compiler = new Compiler(root);
+                List<Command> commandList = compiler.compile(optimize);
+                if (!compiler.isSuccess()) {
+                    printCompilerError(compiler);
+                    return;
+                }
+                if (iOutput != null) {
+                    FileWriter writer = new FileWriter(iOutput);
+                    writer.write(commandListToString(commandList));
+                    writer.close();
+                }
+                Launcher launcher = new Launcher(commandList);
+                launcher.launch(System.in, output == null ? System.out : new FileOutputStream(output), System.err);
+            } catch (IOException ioEx) {
+                System.out.println("File reading error.");
+            } catch (Exception e) {
+                System.out.println("Invalid argument.");
+            }
         }
     }
 

@@ -1,12 +1,29 @@
 package com.cirnoteam.cmm.semantic;
 
+import com.cirnoteam.cmm.machine.Launcher;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.cirnoteam.cmm.semantic.CommandType.*;
 
 public class Optimizer {
-    public static List<Command> optimize(List<Command> source) {
+    private List<Exception> exceptions;
+    private List<Command> source;
+
+    public Optimizer(List<Command> source) {
+        this.source = source;
+    }
+
+    public boolean isSuccess() {
+        return exceptions.isEmpty();
+    }
+
+    public List<Exception> getExceptions() {
+        return exceptions;
+    }
+
+    public List<Command> optimize() {
         List<Command> result = new ArrayList<>(source);
         int p = 0;
         while (p < result.size() - 1) {
@@ -63,6 +80,15 @@ public class Optimizer {
                             c = new Command(PUSH, null, Double.toString(left * right), "double", current.getLine());
                             break;
                         case DIV:
+                            if (Math.abs(right) <= Launcher.PRECISION) {
+                                try {
+                                    throw new CompilerException("Divide by 0", next.getLine());
+                                } catch (Exception e) {
+                                    exceptions.add(e);
+                                    p++;
+                                    continue;
+                                }
+                            }
                             c = new Command(PUSH, null, Double.toString(left / right), "double", current.getLine());
                             break;
                         case MOD:
@@ -92,6 +118,15 @@ public class Optimizer {
                             c = new Command(PUSH, null, Integer.toString(left * right), "int", current.getLine());
                             break;
                         case DIV:
+                            if (right == 0) {
+                                try {
+                                    throw new CompilerException("Divide by 0", next.getLine());
+                                } catch (Exception e) {
+                                    exceptions.add(e);
+                                    p++;
+                                    continue;
+                                }
+                            }
                             c = new Command(PUSH, null, Integer.toString(left / right), "int", current.getLine());
                             break;
                         case MOD:

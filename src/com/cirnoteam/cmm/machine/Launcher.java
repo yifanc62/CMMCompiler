@@ -10,7 +10,7 @@ import java.util.Stack;
 import static com.cirnoteam.cmm.machine.VariableType.*;
 
 public class Launcher {
-    private final double PRECISION = 1e-8;
+    public static final double PRECISION = 1e-8;
     private List<Command> cmdList;
     private VariableTable varTable;
     private Stack<Variable> varStack;
