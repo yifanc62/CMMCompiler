@@ -12,6 +12,7 @@ public class Optimizer {
     private List<Command> source;
 
     public Optimizer(List<Command> source) {
+        this.exceptions = new ArrayList<>();
         this.source = source;
     }
 
