@@ -4,13 +4,10 @@
 第55组 Cirno Team
 
 组员：
-- 苗中涛 2015302580129 软工三班
-- 崔一凡 2015302580270 软工五班
-- 黄希宇 2015302580352 软工六班
 
-目录：
-
-[TOC]
+- Xiyu Huang
+- Yifan Cui
+- Zhongtao Miao
 
 GitHub项目主页：
 https://github.com/yifanc62/CMMCompiler
