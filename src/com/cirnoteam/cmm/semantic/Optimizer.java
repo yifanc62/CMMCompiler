@@ -16,6 +16,18 @@ public class Optimizer {
         this.source = source;
     }
 
+    private static void setOffset(List<Command> source, int start, int offset) {
+        for (Command c : source) {
+            if (c.getType().isJump()) {
+                int address = Integer.valueOf(c.getArg0());
+                if (address - start > (-offset))
+                    c.addressPlus(offset);
+                else if (address - start >= 0)
+                    c.setAddress(start);
+            }
+        }
+    }
+
     public boolean isSuccess() {
         return exceptions.isEmpty();
     }
@@ -149,17 +161,5 @@ public class Optimizer {
             }
         }
         return result;
-    }
-
-    private static void setOffset(List<Command> source, int start, int offset) {
-        for (Command c : source) {
-            if (c.getType().isJump()) {
-                int address = Integer.valueOf(c.getArg0());
-                if (address - start > (-offset))
-                    c.addressPlus(offset);
-                else if (address - start >= 0)
-                    c.setAddress(start);
-            }
-        }
     }
 }

@@ -39,7 +39,6 @@ import static com.cirnoteam.cmm.util.Util.*;
 import java.util.List;
 
 public class Window {
-    public final RGB WHITE = new RGB(0xFF, 0xFF, 0xFF);
     public final RGB BLACK = new RGB(0, 0, 0);
     public final RGB ERROR = new RGB(0xCC, 0x00, 0x00);
     public final RGB KEYWORD = new RGB(0, 0x33, 0xFF);
@@ -122,13 +121,13 @@ public class Window {
                     File outputFile = new File(output);
                     if (!outputFile.exists())
                         if (!outputFile.createNewFile())
-                            throw new IOException();
+                            throw new IOException("Create output file failed");
                 }
                 if (iOutput != null) {
                     File outputFile = new File(iOutput);
                     if (!outputFile.exists())
                         if (!outputFile.createNewFile())
-                            throw new IOException();
+                            throw new IOException("Create output file failed");
                 }
                 Lexer lexer = new Lexer(new FileInputStream(file));
                 TokenStream tokenStream = lexer.getTokens();
@@ -156,7 +155,7 @@ public class Window {
                 Launcher launcher = new Launcher(commandList);
                 launcher.launch(System.in, output == null ? System.out : new FileOutputStream(output), System.err);
             } catch (IOException ioEx) {
-                System.out.println("File reading error.");
+                System.out.println(String.format("File reading error: '%s'.", ioEx.getMessage()));
             } catch (Exception e) {
                 System.out.println("Invalid argument.");
             }

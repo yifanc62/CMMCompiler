@@ -1,0 +1,14 @@
+int a = 0;
+while(1000*50+(34)){
+	if(a>500)
+	break;
+	for(int a=100;;a=a+100){
+	if(a>1000){
+	write(a);break;
+	}
+	}
+	write(a);
+a=a+400;
+}
+write(a);
+//1100 0 1100 400 800
